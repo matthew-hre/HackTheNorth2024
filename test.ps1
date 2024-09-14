@@ -1,4 +1,3 @@
-# Function to move and resize windows based on a JSON object input
 function Move-ResizeProcesses {
     param (
         [Parameter(Mandatory=$true)]
@@ -6,8 +5,8 @@ function Move-ResizeProcesses {
     )
 
     # Define screen width and height
-    $screenWidth = 1550
-    $screenHeight = 830
+    $screenWidth = 1536
+    $screenHeight = 816
 
     # Add necessary user32 DLL calls
     Add-Type @"
@@ -33,41 +32,39 @@ function Move-ResizeProcesses {
       }
 "@
 
+    # Function to get the main window handle of the process
+    function Get-WindowHandle {
+        param (
+            [Parameter(Mandatory=$true)]
+            [string]$processName
+        )
+
+        $process = Get-Process -Name $processName -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }
+        if ($process) {
+            return $process.MainWindowHandle
+        }
+        return $null
+    }
+
     # Process each application in the JSON input
     foreach ($app in $jsonInput) {
-        # Extract details from JSON
         $appName = $app.Name
-        $X = [math]::Round($app.X * $screenWidth)
-        $Y = [math]::Round($app.Y * $screenHeight)
-        $Width = [math]::Round($app.Width * $screenWidth)
-        $Height = [math]::Round($app.Height * $screenHeight)
+        $X = $app.X * $screenWidth
+        $Y = $app.Y * $screenHeight
+        $Width = $app.Width * $screenWidth
+        $Height = $app.Height * $screenHeight
 
         # Start the application process
-        $process = Start-Process -FilePath $appName -PassThru
-        $process.WaitForInputIdle()
-        $waitTime = 500;
-        if ($appName -eq 'code') {
-            $waitTime = 5000;
-        }
-        # Wait until the process has a valid MainWindowHandle
-        $h = $null
-        while (-not $h) {
-            Start-Sleep -Milliseconds $waitTime
-            $h = (Get-Process -Name $appName -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }).MainWindowHandle
-        }
+        $process = Start-Process $appName -PassThru -Wait
+        
+        $h = Get-WindowHandle -processName $appName | Select-Object -First 1
 
-        # Ensure we only have one handle
-        $h = $h | Select-Object -First 1
-
-        # Variables to use as reference for position calls
         $rcWindow = New-Object RECT
         $rcClient = New-Object RECT
 
-        # Get the window coordinates
         [void][Win32]::GetWindowRect($h, [ref]$rcWindow)
         [void][Win32]::GetClientRect($h, [ref]$rcClient)
-
-        # Move and resize the window
+        
         [void][Win32]::MoveWindow($h, $X, $Y, $Width, $Height, $true)
     }
 }
@@ -76,32 +73,25 @@ function Move-ResizeProcesses {
 $json = @"
 [
     {
-        "Name":  "chrome",
-        "X":  0.5,
-        "Y":  0,
-        "Width":  0.5,
-        "Height":  0.5
-    },
-    {
-        "Name":  "Notepad",
-        "X":  0.5,
-        "Y":  0.5,
-        "Width":  0.5,
-        "Height":  0.5
-    },
-    {
-        "Name":  "Notepad",
-        "X":  0.25,
-        "Y":  0.5,
-        "Width":  0.5,
-        "Height":  0.5
-    },
-    {
         "Name":  "code",
         "X":  0,
         "Y":  0,
         "Width":  0.5,
         "Height":  1
+    },
+    {
+        "Name":  "chrome",
+        "X":  0.5,
+        "Y":  0.5,
+        "Width":  0.5,
+        "Height":  0.5
+    },
+    {
+        "Name":  "chrome",
+        "X":  0.5,
+        "Y":  0,
+        "Width":  0.5,
+        "Height":  0.5
     }
 ]
 "@
