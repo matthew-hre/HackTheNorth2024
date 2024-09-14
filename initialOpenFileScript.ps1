@@ -40,55 +40,33 @@ function Move-ResizeProcesses {
         $Y = $app.Y * $screenHeight
         $Width = $app.Width * $screenWidth
         $Height = $app.Height * $screenHeight
+        $Tabs = $app.Tabs
+        $firstTab = $Tabs[0]
+        $secondTab = $Tabs[1]
 
-        # Start the application process
-        $process = Start-Process -FilePath $appName -PassThru
-        $process.WaitForInputIdle()
-        $waitTime = 500;
-        if ($appName -eq 'code') {
-            $waitTime = 5000;
-        }
-        $h = $null
-        while (-not $h) {
-            Start-Sleep -Milliseconds $waitTime
-            $h = (Get-Process -Name $appName -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }).MainWindowHandle
-        }
+        $tempFolder = '--user-data-dir=c:\temp' # pick a temp folder for user data
+        $startmode = '--start-fullscreen' # '--kiosk' is another option
+        $startPage = 'https://stackoverflow.com'
+        $windowSize = "--window-size=500,300"
 
-        $h = $h | Select-Object -First 1
-
-        $rcWindow = New-Object RECT
+        Start-Process -FilePath chrome -ArgumentList $tempFolder, $startPage, $startPage, $windowSize
+        $h = (Get-Process -Name $appName -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }).MainWindowHandle
         $rcClient = New-Object RECT
-
-        [void][Win32]::GetWindowRect($h, [ref]$rcWindow)
         [void][Win32]::GetClientRect($h, [ref]$rcClient)
-        
         [void][Win32]::MoveWindow($h, $X, $Y, $Width, $Height, $true)
-    }
+        }
 }
 
 # Example JSON input
 $json = @"
 [
     {
-        "Name":  "code",
-        "X":  0,
-        "Y":  0,
-        "Width":  0.5,
-        "Height":  1
-    },
-    {
         "Name":  "chrome",
         "X":  0.5,
         "Y":  0.5,
         "Width":  0.5,
-        "Height":  0.5
-    },
-    {
-        "Name":  "chrome",
-        "X":  0.5,
-        "Y":  0,
-        "Width":  0.5,
-        "Height":  0.5
+        "Height":  0.5,
+        "Tabs": ["google.com", "youtube.com"]
     }
 ]
 "@
@@ -98,3 +76,6 @@ $jsonInput = $json | ConvertFrom-Json
 
 # Call the function with the JSON object
 Move-ResizeProcesses -jsonInput $jsonInput
+
+#"--profile-directory=Default","--new-tab",
+        #"--app=data:text/html,<html><body><script>window.moveTo($X,$Y);window.resizeTo($Width,$Height);window.location='https://$firstTab';</script></body></html>"
