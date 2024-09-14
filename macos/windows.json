@@ -1,0 +1,87 @@
+{
+  "505-24" : {
+    "application" : "Control Center",
+    "x" : 0.89931970834732056,
+    "height" : 0.038702927529811859,
+    "y" : 0,
+    "width" : 0.10204081982374191
+  },
+  "503-16" : {
+    "x" : 0,
+    "y" : 0,
+    "application" : "Dock",
+    "width" : 1,
+    "height" : 1
+  },
+  "150-2271" : {
+    "y" : 0,
+    "width" : 1,
+    "height" : 0.038702927529811859,
+    "application" : "Window Server",
+    "x" : 0
+  },
+  "7402-4979" : {
+    "y" : 0.30857741832733154,
+    "width" : 0.40816327929496765,
+    "x" : 0.086394555866718292,
+    "height" : 0.85146445035934448,
+    "application" : "Google Chrome",
+    "tabs" : [
+      "chrome:\/\/newtab\/"
+    ]
+  },
+  "505-25" : {
+    "y" : 0,
+    "application" : "Control Center",
+    "width" : 0.023129250854253769,
+    "height" : 0.038702927529811859,
+    "x" : 0.87619048357009888
+  },
+  "569-26" : {
+    "application" : "Spotlight",
+    "x" : 0.85442179441452026,
+    "y" : 0,
+    "width" : 0.021768707782030106,
+    "height" : 0.038702927529811859
+  },
+  "7402-4603" : {
+    "tabs" : [
+      "https:\/\/www.youtube.com\/",
+      "https:\/\/www.linkedin.com\/authwall?trk=bf&trkInfo=AQGAk6vr-dYGjgAAAZHyv48wO9jQOEpowtLMC6MMxc3SDT8PfWO_LpTN7oQFKoPGJOERn2Gv2PrkSNBhZzZx5NZmYV77EQi1qZLsQs9gIYxDhSWxRiVT7m8GddCdRSdOkdBI22s=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fsulmanc",
+      "chrome:\/\/newtab\/"
+    ],
+    "x" : -0.013605441898107529,
+    "height" : 0.85146445035934448,
+    "y" : 0.079497911036014557,
+    "width" : 0.40816327929496765,
+    "application" : "Google Chrome"
+  },
+  "505-27" : {
+    "application" : "Control Center",
+    "x" : 0.82857143878936768,
+    "width" : 0.025850340723991394,
+    "height" : 0.038702927529811859,
+    "y" : 0
+  },
+  "505-28" : {
+    "width" : 0.02857142873108387,
+    "application" : "Control Center",
+    "y" : 0,
+    "height" : 0.038702927529811859,
+    "x" : 0.80000001192092896
+  },
+  "3718-1115" : {
+    "x" : 0,
+    "y" : 0.039748955518007278,
+    "width" : 1,
+    "height" : 0.89225941896438599,
+    "application" : "Discord"
+  },
+  "498-35" : {
+    "x" : 0.40952381491661072,
+    "width" : 0.53061223030090332,
+    "y" : 0.059623431414365768,
+    "height" : 0.69979077577590942,
+    "application" : "Terminal"
+  }
+}

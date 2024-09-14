@@ -1,0 +1,160 @@
+import Cocoa
+
+func shell(_ args: String...) -> Int32 {
+    let task = Process()
+    task.launchPath = "/bin/bash"
+    task.arguments = args
+    task.launch()
+    task.waitUntilExit()
+    return task.terminationStatus
+}
+
+// Set options
+// Don't include desktop elements like (Dock, MenuBar, etc.)
+let options: CGWindowListOption = CGWindowListOption(arrayLiteral: .excludeDesktopElements)
+
+// Get info about opened windows
+// GCWindowID specified which window ID to look at. 0 means all windows
+let windowsListInfo: CFArray? = CGWindowListCopyWindowInfo(options, CGWindowID(0))
+
+// Convert array type for some reason?
+let infoList: [[String : AnyObject]]? = windowsListInfo as NSArray? as? [[String: AnyObject]]
+var visibleWindows = infoList?.filter { $0["kCGWindowIsOnscreen"] as? Int == 1 }
+
+let allWindows: [[String : AnyObject]]? = infoList?.filter { _ in true }
+
+// Create output JSON
+var json: [String : [String: Any]] = [:]
+
+let screenWidth = Float(NSScreen.main?.frame.width ?? 0)
+let screenHeight = Float(NSScreen.main?.frame.height ?? 0)
+
+var safariWindows: [[String: AnyObject]] = visibleWindows?.filter { $0["kCGWindowOwnerName"] as! String == "Safari" } as [[String : AnyObject]]? ?? []
+
+// Iterate through safaris and use custom logic
+// Group safari windows by width
+var safariGroups: [Int: [[String: AnyObject]]] = [:]
+for window: [String : AnyObject] in safariWindows {
+    let bounds = window["kCGWindowBounds"] as! [String : AnyObject]
+
+    // Check if the key exists
+    if let _ = safariGroups[bounds["Width"] as! Int] ?? nil{
+        // If the key exists, append to the array
+        print("Appending to existing group")
+        safariGroups[bounds["Width"] as! Int]?.append(window)
+    }else{
+        // If the key doesn't exist, create an array w/ just the window
+        print("Creating a new group")
+        safariGroups[bounds["Width"] as! Int] = [window]
+    }
+}
+
+// print(safariGroups)
+
+var usedSafariWindows: [[String: AnyObject]] = []
+for group: (key: Int, value: [[String : AnyObject]]) in safariGroups{
+    print(group)
+    // break
+    // Find the tallest window?
+    var tallestWindow: [String: AnyObject] = group.value[0];
+    for window: [String : AnyObject] in group.value{
+        let windowWidth = (window["kCGWindowBounds"] as AnyObject)["Width"] as! Int
+        let tallestWindowWidth = (tallestWindow["kCGWindowBounds"] as AnyObject)["Width"] as! Int
+        if windowWidth > tallestWindowWidth{
+            tallestWindow = window
+        }
+    }
+    usedSafariWindows.append(tallestWindow)
+}
+
+print(usedSafariWindows)
+
+visibleWindows = visibleWindows?.filter { $0["kCGWindowOwnerName"] as! String != "Safari" }
+visibleWindows?.append(contentsOf: usedSafariWindows)
+
+// Get all chrome tabs
+_ = shell("./listTabs.sh")
+// Read the chrome tabs
+let chromeTabs: String? = try? String(contentsOfFile: "chromeTabs.txt")
+// print(chromeTabs)
+var tabList: [String] = chromeTabs!.components(separatedBy: "\n")
+
+for window: [String : AnyObject]  in visibleWindows! {
+    let windowName: String = window["kCGWindowOwnerName"] as! String
+    let windowBounds: AnyObject = window["kCGWindowBounds"]!
+    let ownerPID = window["kCGWindowOwnerPID"] as! Int
+    let windowNumber = window["kCGWindowNumber"] as! Int
+
+    let key: String = "\(ownerPID)-\(windowNumber)"
+    json[key] = [
+        "x": windowBounds["X"] as! Float / screenWidth,
+        "y": windowBounds["Y"] as! Float / screenHeight,
+        "width": windowBounds["Width"] as! Float / screenWidth,
+        "height": windowBounds["Height"] as! Float / screenHeight,
+        "application": windowName
+    ]
+
+    // If this is chrome, get all the tabs
+    if windowName == "Google Chrome" {
+        
+        // Set the tabs to an empty array
+        let tabs: [String] = []
+        json[key]?["tabs"] = tabs
+        var currentWindowID: String = "";
+        var tabsToRemove: [String] = [String]()   
+        for tab: String in tabList{
+            print("STARTING")
+            print(tab)
+            if tab == "" {
+                continue
+            }
+
+            // The tab IDs are in the form [ParentID:TabID]
+            let tabInfo: [String] = tab.components(separatedBy: " ")
+            let tabIDs: String = tabInfo[0]
+            let tabURL: String = tabInfo[1]
+
+            // Only worry about different tabs if there are in fact, different tabs
+            if tabIDs.firstIndex(of: ":") != nil {
+                
+                let windowID = tabIDs.components(separatedBy: ":")[0].components(separatedBy: "[")[1]
+
+                // Skip this window if it's not part of the tab group we're storing in the current window.
+                print(currentWindowID)
+                print(windowID)
+                if currentWindowID != "" && currentWindowID != windowID{
+                    continue
+                }
+                currentWindowID = windowID
+            }
+
+            // This url should be added to the window tabs list then removed from the generic tabs list
+            if let _ = json[key]?["tabs"] as? [String] {
+                var tabs: [String] = json[key]!["tabs"] as! [String]
+                tabs.append(tabURL)
+                json[key]?["tabs"] = tabs
+
+                print("Adding tab to window")
+                print(tabURL)
+                print(key)
+
+                // Remove tab from the list
+                tabsToRemove.append(tab)
+            }
+
+            // Add the tab to the window
+        }
+
+        // Remove the tabs from the list
+        for tab: String in tabsToRemove{
+            tabList.remove(at: tabList.firstIndex(of: tab)!)
+        }
+    }
+
+}
+
+
+if let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
+    let url = URL(fileURLWithPath: "./windows.json")
+    try? jsonData.write(to: url)
+}
