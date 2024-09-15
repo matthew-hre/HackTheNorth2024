@@ -165,12 +165,14 @@ export function Layouts() {
         setData((prevData) =>
           prevData.map((layout) =>
             layout._id === selected
-              ? { ...layout, layout: newLayout.layout }
+              ? { ...layout, layout: JSON.parse(newLayout.layout) }
               : layout,
           ),
         );
       })
-      .catch((error) => setError(error.message));
+      .catch(
+        (error) => setError(error.message)
+      );
   };
 
   const loadWindowLayout = async (event: FormEvent<HTMLFormElement>) => {
