@@ -22,7 +22,7 @@ func shell(_ args: String...) -> Int32 {
     return task.terminationStatus
 }
 
-let SUPPORTED_PROGRAMS = ["Google Chrome", "chrome", "Chrome", "Visual Studio Code", "Code", "Notes", "TextEdit", ]
+let SUPPORTED_PROGRAMS = ["Google Chrome", "chrome", "Chrome", "Visual Studio Code", "Code", "Notes", "TextEdit", "Spotify", "Terminal"]
 
 // Remove supported programs
 for program in SUPPORTED_PROGRAMS{

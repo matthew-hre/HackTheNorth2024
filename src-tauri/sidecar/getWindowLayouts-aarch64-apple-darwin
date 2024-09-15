@@ -33,6 +33,8 @@ let screenHeight = Float(NSScreen.main?.frame.height ?? 0)
 
 var safariWindows: [[String: AnyObject]] = visibleWindows?.filter { $0["kCGWindowOwnerName"] as! String == "Safari" } as [[String : AnyObject]]? ?? []
 
+let SUPPORTED_PROGRAMS = ["Google Chrome", "chrome", "Chrome", "Visual Studio Code", "Code", "Notes", "TextEdit", "Spotify", "Terminal"]
+
 // Iterate through safaris and use custom logic
 // Group safari windows by width
 var safariGroups: [Int: [[String: AnyObject]]] = [:]
@@ -72,6 +74,12 @@ for group: (key: Int, value: [[String : AnyObject]]) in safariGroups{
 // print(usedSafariWindows)
 
 visibleWindows = visibleWindows?.filter { $0["kCGWindowOwnerName"] as! String != "Safari" }
+visibleWindows = visibleWindows?.filter { window in
+    if let windowName = window["kCGWindowOwnerName"] as? String {
+        return SUPPORTED_PROGRAMS.contains(windowName)
+    }
+    return false
+}
 visibleWindows?.append(contentsOf: usedSafariWindows)
 
 // Get all chrome tabs

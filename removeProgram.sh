@@ -1,1 +1,1 @@
-osascript -e 'tell application "TextEdit" to if it is running then quit'
+osascript -e 'tell application "Terminal" to if it is running then quit'
