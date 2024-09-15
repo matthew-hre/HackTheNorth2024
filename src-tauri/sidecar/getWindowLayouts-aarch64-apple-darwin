@@ -42,11 +42,11 @@ for window: [String : AnyObject] in safariWindows {
     // Check if the key exists
     if let _ = safariGroups[bounds["Width"] as! Int] ?? nil{
         // If the key exists, append to the array
-        print("Appending to existing group")
+        // print("Appending to existing group")
         safariGroups[bounds["Width"] as! Int]?.append(window)
     }else{
         // If the key doesn't exist, create an array w/ just the window
-        print("Creating a new group")
+        // print("Creating a new group")
         safariGroups[bounds["Width"] as! Int] = [window]
     }
 }
@@ -55,7 +55,7 @@ for window: [String : AnyObject] in safariWindows {
 
 var usedSafariWindows: [[String: AnyObject]] = []
 for group: (key: Int, value: [[String : AnyObject]]) in safariGroups{
-    print(group)
+    // print(group)
     // break
     // Find the tallest window?
     var tallestWindow: [String: AnyObject] = group.value[0];
@@ -69,7 +69,7 @@ for group: (key: Int, value: [[String : AnyObject]]) in safariGroups{
     usedSafariWindows.append(tallestWindow)
 }
 
-print(usedSafariWindows)
+// print(usedSafariWindows)
 
 visibleWindows = visibleWindows?.filter { $0["kCGWindowOwnerName"] as! String != "Safari" }
 visibleWindows?.append(contentsOf: usedSafariWindows)
@@ -105,8 +105,8 @@ for window: [String : AnyObject]  in visibleWindows! {
         var currentWindowID: String = "";
         var tabsToRemove: [String] = [String]()   
         for tab: String in tabList{
-            print("STARTING")
-            print(tab)
+            // print("STARTING")
+            // print(tab)
             if tab == "" {
                 continue
             }
@@ -122,8 +122,8 @@ for window: [String : AnyObject]  in visibleWindows! {
                 let windowID = tabIDs.components(separatedBy: ":")[0].components(separatedBy: "[")[1]
 
                 // Skip this window if it's not part of the tab group we're storing in the current window.
-                print(currentWindowID)
-                print(windowID)
+                // print(currentWindowID)
+                // print(windowID)
                 if currentWindowID != "" && currentWindowID != windowID{
                     continue
                 }
@@ -136,9 +136,9 @@ for window: [String : AnyObject]  in visibleWindows! {
                 tabs.append(tabURL)
                 json[key]?["tabs"] = tabs
 
-                print("Adding tab to window")
-                print(tabURL)
-                print(key)
+                // print("Adding tab to window")
+                // print(tabURL)
+                // print(key)
 
                 // Remove tab from the list
                 tabsToRemove.append(tab)
@@ -155,8 +155,4 @@ for window: [String : AnyObject]  in visibleWindows! {
 
 }
 
-
-if let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
-    let url = URL(fileURLWithPath: "./windows.json")
-    try? jsonData.write(to: url)
-}
+print(json)
