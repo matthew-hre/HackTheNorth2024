@@ -3,6 +3,7 @@ let
 
   libraries = with pkgs;[
     webkitgtk
+    webkitgtk2
     gtk3
     cairo
     gdk-pixbuf

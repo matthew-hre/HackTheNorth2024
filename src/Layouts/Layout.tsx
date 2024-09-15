@@ -1,9 +1,11 @@
-import { Command } from "@tauri-apps/api/shell";
+import { Trash } from "lucide-react";
 
 export function Layout({
   layout,
   title,
   remove,
+  onClick,
+  selected,
 }: {
   layout: {
     x: number;
@@ -14,22 +16,32 @@ export function Layout({
   }[];
   title: string;
   remove: () => void;
+  onClick: () => void;
+  selected: boolean;
 }) {
   return (
-    <div className="flex flex-col flex-1 min-w-80 max-w-[30rem] h-max p-4 border rounded-lg bg-background/80 backdrop-blur">
+    <div
+      className="flex flex-col flex-1 min-w-60 max-w-xs h-max p-4 border rounded-lg bg-background/80 backdrop-blur hover:cursor-pointer"
+      onClick={onClick}
+    >
+      {selected && (
+        <div className="absolute top-0 left-0 w-full h-full bg-primary/20 rounded-lg z-0" />
+      )}
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">{title}</h2>
-        <button className="text-sm text-primary" onClick={remove}>
-          Delete
+        <button
+          className="text-sm hover:text-primary text-primary/50 z-10"
+          onClick={remove}
+        >
+          <Trash />
         </button>
-        <button onClick={() => runFancierCommand()}>test</button>
       </div>
       <div className="mt-2">
-        <div className="relative aspect-video bg-background/60 border border-muted rounded-lg overflow-hidden">
+        <div className="relative aspect-video bg-muted/50 border border-muted rounded-lg overflow-hidden">
           {layout.map((item, index) => (
             <div
               key={index}
-              className="absolute border border-primary bg-muted rounded-lg"
+              className="absolute border border-primary bg-muted rounded-lg flex flex-col items-center justify-center"
               style={{
                 top: `${item.y * 100}%`,
                 left: `${item.x * 100}%`,
@@ -44,46 +56,4 @@ export function Layout({
       </div>
     </div>
   );
-}
-
-async function runFancierCommand() {
-  const command = Command.sidecar(`sidecar/test`);
-
-  const child = await command.execute();
-
-  console.log("child", child);
-
-  const result = child.stdout;
-
-  console.log("result", result);
-
-  return result;
-}
-
-async function runCommand() {
-  console.log("test");
-
-  const command = new Command("test", ["hello"]);
-
-  command.on("close", (data) => {
-    console.log(
-      `command finished with code ${data.code} and signal ${data.signal}`,
-    );
-  });
-
-  console.log("command", command);
-
-  command.on("error", (error) => console.error(`command error: "${error}"`));
-  command.stdout.on("data", (line) => console.log(`command stdout: "${line}"`));
-  command.stderr.on("data", (line) => console.log(`command stderr: "${line}"`));
-
-  const child = await command.execute();
-
-  console.log("child", child);
-
-  const result = child.stdout;
-
-  console.log("result", result);
-
-  return result;
 }

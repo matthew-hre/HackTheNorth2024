@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 import { LayoutList } from "@/Layouts/LayoutList";
 import { Layout } from "@/Layouts/Layout";
 import { Button } from "@/components/ui/button";
+import { Download, Plus, RefreshCcw, Save } from "lucide-react";
+import { Command } from "@tauri-apps/api/shell";
 
 type LayoutType = {
   _id: string;
@@ -25,6 +27,8 @@ export function Layouts() {
   const [data, setData] = useState<LayoutType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
     const url = "https://utmost-owl-921.convex.cloud/api/query";
@@ -60,27 +64,17 @@ export function Layouts() {
     console.log(data);
   }, [data]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const addWindowLayout = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const getRandomValue = () => Math.random();
+
+    const command = Command.sidecar(`sidecar/getWindowLayouts`);
+
+    const child = await command.execute();
+
+    const result = child.stdout;
 
     const newLayout = {
-      layout: [
-        {
-          x: getRandomValue(),
-          y: getRandomValue(),
-          width: getRandomValue(),
-          height: getRandomValue(),
-          application: "Code",
-        },
-        {
-          x: getRandomValue(),
-          y: getRandomValue(),
-          width: getRandomValue(),
-          height: getRandomValue(),
-          application: "Chrome",
-        },
-      ],
+      layout: JSON.parse(result),
     };
 
     const url = "https://utmost-owl-921.convex.cloud/api/mutation";
@@ -112,7 +106,7 @@ export function Layouts() {
       });
   };
 
-  const removeLayout = (id: string) => {
+  const removeWindowLayout = (id: string) => {
     const url = "https://utmost-owl-921.convex.cloud/api/mutation";
     const request = {
       path: "layouts:remove",
@@ -135,8 +129,72 @@ export function Layouts() {
       .catch((error) => setError(error.message));
   };
 
+  const updateWindowLayout = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selected) return;
+
+    const command = Command.sidecar(`sidecar/getWindowLayouts`);
+
+    const child = await command.execute();
+
+    const result = child.stdout;
+
+    const newLayout = {
+      layout: JSON.parse(result),
+    };
+
+    const url = "https://utmost-owl-921.convex.cloud/api/mutation";
+    const request = {
+      paths: "layouts:update",
+      args: { id: selected, ...newLayout },
+      format: "json",
+    };
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeader,
+      },
+      body: JSON.stringify(request),
+    })
+      .then(() => {
+        setData((prevData) =>
+          prevData.map((layout) =>
+            layout._id === selected
+              ? { ...layout, layout: newLayout.layout }
+              : layout,
+          ),
+        );
+      })
+      .catch((error) => setError(error.message));
+  };
+
+  const loadWindowLayout = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selected) return;
+
+    const layout = data.find((layout) => layout._id === selected);
+
+    if (!layout) return;
+
+    const command = Command.sidecar(`sidecar/setWindowLayouts`, [
+      JSON.stringify(layout),
+    ]);
+
+    await command.execute();
+  };
+
   return (
     <>
+      <div
+        className="absolute top-0 left-0 w-full h-full rounded-lg z-0"
+        onClick={() => {
+          setSelected(null);
+        }}
+      />
       <LayoutList>
         {!loading && data.length === 0 ? (
           <div className="flex items-center justify-center h-32 text-lg text-muted-foreground">
@@ -147,7 +205,8 @@ export function Layouts() {
             Error: {error}
           </div>
         ) : loading ? (
-          <div className="flex items-center justify-center h-32 text-lg text-muted-foreground">
+          <div className="absolute left-0 top-48 flex items-center justify-center h-32 w-full text-lg text-muted-foreground">
+            <RefreshCcw className="animate-spin h-6 w-6 mr-2" />
             Loading...
           </div>
         ) : (
@@ -156,18 +215,42 @@ export function Layouts() {
               key={layout._id}
               layout={layout.layout}
               title={layout.title}
+              onClick={() => setSelected(layout._id)}
+              selected={selected === layout._id}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              remove={() => removeLayout(layout._id)}
+              remove={() => removeWindowLayout(layout._id)}
             />
           ))
         )}
       </LayoutList>
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-screen-lg px-8 mt-auto mb-8"
-      >
-        <Button type="submit">Create a new layout</Button>
-      </form>
+      <div className="fixed bottom-0 w-full bg-background/80 backdrop-blur p-4 flex flex-row space-between gap-4">
+        <form onSubmit={addWindowLayout} className="flex-1">
+          <Button type="submit" className="w-full">
+            <Plus className="h-6 w-6 mr-2" />
+            Create layout
+          </Button>
+        </form>
+        <form onSubmit={updateWindowLayout} className="flex-1">
+          <Button type="submit" className="w-full">
+            <Save className="h-6 w-6 mr-2" />
+            Update Layout
+          </Button>
+        </form>
+        <form onSubmit={loadWindowLayout} className="flex-1">
+          <Button type="submit" className="w-full" disabled={!selected}>
+            <Download className="h-6 w-6 mr-2" />
+            Import layout
+          </Button>
+        </form>
+        <Button
+          onClick={() => {
+            window.location.reload();
+          }}
+          className="z-10 w-min h-min p-2 rounded-full backdrop-blur hover:bg-primary/90"
+        >
+          <RefreshCcw className="h-5 w-5" />
+        </Button>
+      </div>
     </>
   );
 }
