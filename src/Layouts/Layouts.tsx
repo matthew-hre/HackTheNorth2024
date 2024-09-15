@@ -2,14 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery } from "convex/react";
-import { FormEvent, useState } from "react";
+import { FormEvent } from "react";
 import { api } from "../../convex/_generated/api";
 import { LayoutList } from "@/Layouts/LayoutList";
 import { Layout } from "@/Layouts/Layout";
 import { Id } from "../../convex/_generated/dataModel";
 
 export function Layouts({ viewer }: { viewer: Id<"users"> }) {
-  const [newMessageText, setNewMessageText] = useState("");
   const layouts = useQuery(api.layouts.list);
   const addLayout = useMutation(api.layouts.create);
 
@@ -17,7 +16,6 @@ export function Layouts({ viewer }: { viewer: Id<"users"> }) {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setNewMessageText("");
     const getRandomValue = () => Math.random();
 
     addLayout({

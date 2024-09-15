@@ -21,6 +21,41 @@ export const list = query({
   },
 });
 
+export const updateLayout = mutation({
+  args: {
+    id: v.id("layouts"),
+    layout: v.array(
+      v.object({
+        x: v.number(),
+        y: v.number(),
+        width: v.number(),
+        height: v.number(),
+        application: v.string(),
+      }),
+    ),
+  },
+  handler: async (ctx, { id, layout }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not signed in");
+    }
+    // Update the message.
+    await ctx.db.patch(id, { layout });
+  },
+});
+
+export const updateTitle = mutation({
+  args: { id: v.id("layouts"), title: v.string() },
+  handler: async (ctx, { id, title }) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) {
+      throw new Error("Not signed in");
+    }
+    // Update the message.
+    await ctx.db.patch(id, { title });
+  },
+});
+
 export const create = mutation({
   args: {
     layout: v.array(
