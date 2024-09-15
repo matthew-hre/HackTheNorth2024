@@ -1,0 +1,1 @@
+osascript -e 'tell application "TextEdit" to if it is running then quit'

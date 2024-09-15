@@ -75,9 +75,9 @@ visibleWindows = visibleWindows?.filter { $0["kCGWindowOwnerName"] as! String !=
 visibleWindows?.append(contentsOf: usedSafariWindows)
 
 // Get all chrome tabs
-_ = shell("./listTabs.sh")
+_ = shell("sidecar/listTabs-aarch64-apple-darwin")
 // Read the chrome tabs
-let chromeTabs: String? = try? String(contentsOfFile: "chromeTabs.txt")
+let chromeTabs: String? = try? String(contentsOfFile: "../chromeTabs.txt")
 // print(chromeTabs)
 var tabList: [String] = chromeTabs!.components(separatedBy: "\n")
 
@@ -155,4 +155,16 @@ for window: [String : AnyObject]  in visibleWindows! {
 
 }
 
-print(json)
+var jsonArray: [[String: Any]] = []
+for obj in json{
+    jsonArray.append(obj.value)
+}
+
+
+// Serialize to JSON
+let jsonData = try JSONSerialization.data(withJSONObject: jsonArray)
+
+// Convert to a string and print
+if let JSONString = String(data: jsonData, encoding: String.Encoding.utf8) {
+   print(JSONString)
+}

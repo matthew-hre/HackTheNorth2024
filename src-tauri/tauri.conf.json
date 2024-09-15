@@ -25,8 +25,13 @@
             "sidecar": true
           },
           {
-            "name": "sidecar/setWindowLayouts",
+            "name": "sidecar/listTabs",
             "sidecar": true
+          },
+          {
+            "name": "sidecar/setWindowLayouts",
+            "sidecar": true,
+            "args": true
           },
           {
             "name": "sidecar/getWindowLayouts",
@@ -47,7 +52,7 @@
       "deb": {
         "depends": []
       },
-      "externalBin": ["sidecar/test"],
+      "externalBin": ["sidecar/test", "sidecar/setWindowLayouts", "sidecar/getWindowLayouts", "sidecar/listTabs"],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",

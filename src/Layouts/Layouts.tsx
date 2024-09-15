@@ -135,13 +135,15 @@ export function Layouts() {
     if (!selected) return;
 
     const command = Command.sidecar(`sidecar/getWindowLayouts`);
-
     const child = await command.execute();
 
     const result = child.stdout;
+    const temp = JSON.parse(result);
+
+    console.log(temp);
 
     const newLayout = {
-      layout: JSON.parse(result),
+      layout: JSON.stringify(temp),
     };
 
     const url = "https://utmost-owl-921.convex.cloud/api/mutation";
@@ -180,11 +182,18 @@ export function Layouts() {
 
     if (!layout) return;
 
-    const command = Command.sidecar(`sidecar/setWindowLayouts`, [
-      JSON.stringify(layout),
-    ]);
+    const layoutString = JSON.stringify(layout["layout"])
+    console.log("LAYOUT STRING")
+    console.log(layoutString)
+    const command = Command.sidecar(`sidecar/setWindowLayouts`,
+      layoutString
+    );
+    console.log(command)
 
-    await command.execute();
+    const child = await command.execute();
+    console.log(child)
+    console.log(child.stderr)
+    console.log(child.stdout)
   };
 
   const updateTitle = (id: string, title: string) => {

@@ -3,13 +3,13 @@
 import Foundation
 import Cocoa
 
+
 var jsonInput: String = ""
 for argument: String in CommandLine.arguments{
     jsonInput = argument
 }
 
 let data: Data = Data(jsonInput.utf8)
-print(data)
 let json: [[String: AnyObject]] = try JSONSerialization.jsonObject(with: data, options: []) as! [[String: AnyObject]]
 print(json)
 
@@ -22,14 +22,17 @@ func shell(_ args: String...) -> Int32 {
     return task.terminationStatus
 }
 
-let SUPPORTED_PROGRAMS = ["Visual Studio Code", "Code", "Google Chrome", "Notes", "TextEdit", "chrome"]
+let SUPPORTED_PROGRAMS = ["Google Chrome", "chrome", "Chrome", "Visual Studio Code", "Code", "Notes", "TextEdit", ]
 
 // Remove supported programs
 for program in SUPPORTED_PROGRAMS{
+    print("Removing \(program)")
     let removeProgramScript = """
-    tell application "\(program)" to if it is running then quit
+    osascript -e 'tell application "\(program)" to if it is running then quit'
     """
-    try removeProgramScript.write(toFile: "removeProgram.sh", atomically: true, encoding: .utf8)
+    try removeProgramScript.write(toFile: "../removeProgram.sh", atomically: true, encoding: .utf8)
+    let _ = shell("../removeProgram.sh")
+    print(removeProgramScript)
 }
 
 // Loop through each window and restore it
@@ -60,7 +63,11 @@ for value: [String : AnyObject] in json {
     let y: Int = Int((value["y"] as! CGFloat ) * screenHeight)
     let width: Int = Int((value["width"] as! CGFloat) * screenWidth)
     let height: Int = Int((value["height"] as! CGFloat) * screenHeight)
-    let tabURLs: [String] = value["tabs"] as! [String]
+    
+    var tabURLs: [String] = []
+    if let _ = value["tabs"] as? [String]{
+        tabURLs = value["tabs"] as! [String]
+    }
 
     // Open window differently depending on the app and how many have been opened
     var restoreScript: String = "";
@@ -80,7 +87,8 @@ for value: [String : AnyObject] in json {
         }
         safariCount += 1;
     }
-    else if application == "Google Chrome" || application == "chrome"{
+    else if application == "Google Chrome" || application == "chrome" || application == "Chrome"{
+        application = "Google Chrome"
         if chromeCount > 0{
         restoreScript = """
             osascript -e 'tell application "Google Chrome" to activate
@@ -130,10 +138,10 @@ for value: [String : AnyObject] in json {
     resizeScriptSet = true;
     }
 
-    try restoreScript.write(toFile: "restoreWindows.sh", atomically: true, encoding: .utf8)
+    try restoreScript.write(toFile: "../restoreWindows.sh", atomically: true, encoding: .utf8)
 
     // Run the script
-    var cmd = "restoreWindows.sh"
+    var cmd = "../restoreWindows.sh"
     if shell(cmd) != 0 {
         print("Failed to restore.")
     } else {
@@ -150,13 +158,13 @@ for value: [String : AnyObject] in json {
     }
 
     // Open all the tabs
-    if application == "Google Chrome"{
+    if application == "Google Chrome" || application == "chrome" || application == "Chrome"{
         for url: String in tabURLs{
             let openTabScript = """
                 osascript -e 'set theURL to "\(url)"
                 tell application "Google Chrome" to open location theURL'
             """
-            let openTabScriptName = "openTab.sh"
+            let openTabScriptName = "../openTab.sh"
             try openTabScript.write(toFile: openTabScriptName, atomically: true, encoding: .utf8)
             let _ = shell(openTabScriptName)
 
@@ -165,10 +173,10 @@ for value: [String : AnyObject] in json {
     sleep(1)
 
     // Write a command string to resizeWindows.sh
-    try resizeScript.write(toFile: "resizeWindows.sh", atomically: true, encoding: .utf8)
+    try resizeScript.write(toFile: "../resizeWindows.sh", atomically: true, encoding: .utf8)
 
     // Run the script
-    cmd = "resizeWindows.sh"
+    cmd = "../resizeWindows.sh"
     if shell(cmd) != 0 {
         print("Failed to run.")
     } else {
