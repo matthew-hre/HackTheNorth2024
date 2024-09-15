@@ -5,8 +5,8 @@ function Move-ResizeProcesses {
     )
 
     # Define screen width and height
-    $screenWidth = 1536
-    $screenHeight = 816
+    $screenwidth = 1536
+    $screenheight = 816
 
     # Add necessary user32 DLL calls
     Add-Type @"
@@ -21,7 +21,7 @@ function Move-ResizeProcesses {
         public static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int Width, int Height, bool bRepaint);
+        public static extern bool MoveWindow(IntPtr hWnd, int x, int y, int width, int height, bool bRepaint);
       }
       public struct RECT
       {
@@ -35,25 +35,25 @@ function Move-ResizeProcesses {
     # Process each application in the JSON input
     foreach ($app in $jsonInput) 
     {
-        $appName = $app.Name
-        $X = $app.X * $screenWidth
-        $Y = $app.Y * $screenHeight
-        $Width = $app.Width * $screenWidth
-        $Height = $app.Height * $screenHeight
+        $appName = $app.application
+        $x = $app.x * $screenwidth
+        $y = $app.y * $screenheight
+        $width = $app.width * $screenwidth
+        $height = $app.height * $screenheight
 
         if ($appName -eq "chrome") 
         {
-            $windowSize = "--window-size=$Width,$Height"
-            $windowPosition = "--window-position=$X,$Y"
+            $windowSize = "--window-size=$width,$height"
+            $windowPosition = "--window-position=$x,$y"
 
-            $Tabs = $app.Tabs
+            $tabs = $app.tabs
 
-            $tabsArgumentList = ''
-            foreach ($tab in $Tabs) {
-                $tabsArgumentList += "https://$tab" + " "
+            $tabsList = ''
+            foreach ($tab in $tabs) {
+                $tabsList += "https://$tab" + " "
             }
 
-            Start-Process -FilePath 'chrome' -ArgumentList $tabsArgumentList, $windowPosition, $windowSize
+            Start-Process -FilePath 'chrome' -ArgumentList $tabsList, $windowPosition, $windowSize
         }
         elseif ($appName -eq "code")
         {
@@ -62,7 +62,7 @@ function Move-ResizeProcesses {
             $h = (Get-Process -Name $appName -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }).MainWindowHandle
             $rcClient = New-Object RECT
             [void][Win32]::GetClientRect($h, [ref]$rcClient)
-            [void][Win32]::MoveWindow($h, $X, $Y, $Width, $Height, $true)
+            [void][Win32]::MoveWindow($h, $x, $y, $width, $height, $true)
         }
         else
         {
@@ -72,7 +72,7 @@ function Move-ResizeProcesses {
             $h = (Get-Process -Name $appName -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 }).MainWindowHandle
             $rcClient = New-Object RECT
             [void][Win32]::GetClientRect($h, [ref]$rcClient)
-            [void][Win32]::MoveWindow($h, $X, $Y, $Width, $Height, $true)
+            [void][Win32]::MoveWindow($h, $x, $y, $width, $height, $true)
         }
     }
 }
@@ -81,26 +81,26 @@ function Move-ResizeProcesses {
 $json = @"
 [
     {
-        "Name":  "chrome",
-        "X":  0,
-        "Y":  0,
-        "Width":  0.5,
-        "Height":  0.5,
-        "Tabs": ["google.com", "youtube.com", "moodle.com"]
+        "application":  "chrome",
+        "x":  0,
+        "y":  0,
+        "width":  0.5,
+        "height":  0.5,
+        "tabs": ["google.com", "youtube.com", "moodle.com"]
     },
     {
-        "Name":  "code",
-        "X":  0.5,
-        "Y":  0,
-        "Width":  0.5,
-        "Height":  1
+        "application":  "code",
+        "x":  0.5,
+        "y":  0,
+        "width":  0.5,
+        "height":  1
     },
     {
-        "Name":  "Notepad",
-        "X":  0,
-        "Y":  0.5,
-        "Width":  0.5,
-        "Height":  0.5
+        "application":  "Notepad",
+        "x":  0,
+        "y":  0.5,
+        "width":  0.5,
+        "height":  0.5
     }
 ]
 "@

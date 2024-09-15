@@ -33,16 +33,13 @@ $windows = @()
 
 $screenWidth = 1550
 $screenHeight = 830
+$chromeOpen = $false
 
 # Get information about open windows
 Get-Process | ForEach-Object {
     if ($_.MainWindowHandle -ne 0 -and -not $excludedProcesses.Contains($_.Name)) {
         $rect = New-Object RECT
         [Window]::GetWindowRect($_.MainWindowHandle, [ref]$rect) > $null
-        $rect.Left += 7;
-        $rect.Top += 7;
-        $rect.Right += 7;
-        $rect.Bottom += 7;
         $width = $rect.Right - $rect.Left;
         $height = $rect.Bottom - $rect.Top;
 
@@ -52,13 +49,15 @@ Get-Process | ForEach-Object {
         $heightFraction = [math]::Round($height / $screenHeight, 4)
 
         $windows += [pscustomobject]@{
-            Name   = $_.Name
-            X      = $xFraction
-            Y      = $yFraction
-            Width  = $widthFraction
-            Height = $heightFraction
+            application   = $_.Name
+            x      = $xFraction
+            y      = $yFraction
+            width  = $widthFraction
+            height = $heightFraction
         }
     }
 }
 
-$windows | ConvertTo-Json | Out-File -FilePath "information.json"
+$windows | ConvertTo-Json | % { [System.Text.RegularExpressions.Regex]::Unescape($_) } | Set-Content -Path "information.json" -Encoding utf8
+
+python get_window_layout.py
