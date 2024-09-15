@@ -187,6 +187,35 @@ export function Layouts() {
     await command.execute();
   };
 
+  const updateTitle = (id: string, title: string) => {
+    const url = "https://utmost-owl-921.convex.cloud/api/mutation";
+    const request = {
+      path: "layouts:updateTitle",
+      args: { id, title },
+      format: "json",
+    };
+
+    console.log(JSON.stringify(request));
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeader,
+      },
+      body: JSON.stringify(request),
+    })
+      .then(() => {
+        console.log("Updated title");
+        setData((prevData) =>
+          prevData.map((layout) =>
+            layout._id === selected ? { ...layout, title } : layout,
+          ),
+        );
+      })
+      .catch((error) => setError(error.message));
+  };
+
   return (
     <>
       <div
@@ -217,6 +246,9 @@ export function Layouts() {
               title={layout.title}
               onClick={() => setSelected(layout._id)}
               selected={selected === layout._id}
+              updateTitle={(title) => {
+                updateTitle(selected || "", title);
+              }}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               remove={() => removeWindowLayout(layout._id)}
             />

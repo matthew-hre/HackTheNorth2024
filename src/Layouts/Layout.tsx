@@ -1,4 +1,5 @@
-import { Trash } from "lucide-react";
+import { Pencil, Save, Trash, X } from "lucide-react";
+import { useState } from "react";
 
 export function Layout({
   layout,
@@ -6,6 +7,7 @@ export function Layout({
   remove,
   onClick,
   selected,
+  updateTitle,
 }: {
   layout: {
     x: number;
@@ -18,7 +20,16 @@ export function Layout({
   remove: () => void;
   onClick: () => void;
   selected: boolean;
+  updateTitle: (title: string) => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [newTitle, setNewTitle] = useState(title);
+  const [titleState, setTitle] = useState(title);
+
+  function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setNewTitle(e.target.value);
+  }
+
   return (
     <div
       className="flex flex-col flex-1 min-w-60 max-w-xs h-max p-4 border rounded-lg bg-background/80 backdrop-blur hover:cursor-pointer"
@@ -28,13 +39,57 @@ export function Layout({
         <div className="absolute top-0 left-0 w-full h-full bg-primary/20 rounded-lg z-0" />
       )}
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">{title}</h2>
-        <button
-          className="text-sm hover:text-primary text-primary/50 z-10"
-          onClick={remove}
-        >
-          <Trash />
-        </button>
+        {editing ? (
+          <input
+            type="text"
+            value={newTitle}
+            onChange={handleTitleChange}
+            className="text-lg font-semibold bg-transparent border-b border-primary/50 text-primary/50 z-10"
+          />
+        ) : (
+          <h2 className="text-lg font-semibold">{titleState}</h2>
+        )}
+
+        <div className="flex items-center gap-2">
+          {editing ? (
+            <>
+              <button
+                className="text-sm hover:text-foreground text-primary z-10"
+                onClick={() => {
+                  setEditing(false);
+                  setTitle(newTitle);
+                  updateTitle(newTitle);
+                }}
+              >
+                <Save />
+              </button>
+              <button
+                className="text-sm hover:text-foreground text-primary z-10"
+                onClick={() => {
+                  setEditing(!editing);
+                  setTitle(title);
+                }}
+              >
+                <X />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="text-sm hover:text-foreground text-primary z-10"
+                onClick={() => setEditing(!editing)}
+              >
+                <Pencil />
+              </button>
+              <button
+                className="text-sm hover:text-foreground text-primary z-10"
+                onClick={remove}
+              >
+                <Trash />
+              </button>
+            </>
+          )}
+        </div>
       </div>
       <div className="mt-2">
         <div className="relative aspect-video bg-muted/50 border border-muted rounded-lg overflow-hidden">
