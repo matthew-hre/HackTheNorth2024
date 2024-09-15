@@ -26,6 +26,9 @@ let SUPPORTED_PROGRAMS = ["Google Chrome", "chrome", "Chrome", "Visual Studio Co
 
 // Remove supported programs
 for program in SUPPORTED_PROGRAMS{
+    if program == "Terminal"{
+        continue
+    }
     print("Removing \(program)")
     let removeProgramScript = """
     osascript -e 'tell application "\(program)" to if it is running then quit'
