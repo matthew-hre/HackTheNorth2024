@@ -1,0 +1,1 @@
+tell application "chrome" to if it is running then quit

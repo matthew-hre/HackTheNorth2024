@@ -1,0 +1,1 @@
+osascript -e 'tell application "Spotify" to if it is running then quit'

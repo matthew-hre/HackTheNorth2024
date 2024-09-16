@@ -1,0 +1,1 @@
+/Users/jeffbrin/Desktop/htn/HackTheNorth2024/src-tauri/sidecar/setWindowLayouts-aarch64-apple-darwin

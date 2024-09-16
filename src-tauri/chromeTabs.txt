@@ -1,0 +1,6 @@
+[1997842566] https://www.youtube.com/
+[1997842567] https://www.linkedin.com/authwall?trk=bf&trkInfo=AQGAk6vr-dYGjgAAAZHyv48wO9jQOEpowtLMC6MMxc3SDT8PfWO_LpTN7oQFKoPGJOERn2Gv2PrkSNBhZzZx5NZmYV77EQi1qZLsQs9gIYxDhSWxRiVT7m8GddCdRSdOkdBI22s=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fsulmanc
+[1997842568] https://bash.cyberciti.biz/guide/Shebang#google_vignette
+[1997842580] http://localhost:5173/
+[1997842581] https://stackoverflow.com/questions/39377904/nested-dictionaries-swift-curly-braces
+[1997842582] https://stackoverflow.com/questions/46262942/printing-valid-json-with-a-swift-script
