@@ -148,8 +148,8 @@ export function Layouts() {
 
     const url = "https://utmost-owl-921.convex.cloud/api/mutation";
     const request = {
-      paths: "layouts:update",
-      args: { id: selected, ...newLayout },
+      path: "layouts:updateLayout",
+      args: { id: selected, layout: newLayout.layout },
       format: "json",
     };
 

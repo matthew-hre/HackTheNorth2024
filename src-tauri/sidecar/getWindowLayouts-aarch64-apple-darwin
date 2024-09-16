@@ -33,7 +33,7 @@ let screenHeight = Float(NSScreen.main?.frame.height ?? 0)
 
 var safariWindows: [[String: AnyObject]] = visibleWindows?.filter { $0["kCGWindowOwnerName"] as! String == "Safari" } as [[String : AnyObject]]? ?? []
 
-let SUPPORTED_PROGRAMS = ["Google Chrome", "chrome", "Chrome", "Visual Studio Code", "Code", "Notes", "TextEdit", "Spotify", "Terminal"]
+let SUPPORTED_PROGRAMS = ["Google Chrome", "chrome", "Chrome", "Visual Studio Code", "Code", "Notes", "TextEdit", "Spotify", "Terminal", "Safari"]
 
 // Iterate through safaris and use custom logic
 // Group safari windows by width
